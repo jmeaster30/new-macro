@@ -1,11 +1,12 @@
 use new_macro::New;
 
 #[derive(Debug, New)]
-struct Test {
-    a: i32,
+struct Test<'a> {
+    a: &'a i32,
 }
 
 fn main() {
-    let t = Test::new(12);
+    let value = 12;
+    let t = Test::new(&value);
     println!("Hello {:#?}", t);
 }

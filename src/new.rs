@@ -1,7 +1,7 @@
 use std::str::FromStr;
 use proc_macro2::{Span, TokenStream, Ident};
 use quote::{quote, quote_spanned};
-use syn::{Attribute, Data, Expr, Fields, FnArg, GenericParam, Lit, Meta, Pat, PatIdent, PatType, Type};
+use syn::{Attribute, Data, Expr, Fields, FnArg, GenericParam, Lifetime, LifetimeParam, Lit, Meta, Pat, PatIdent, PatType, Type};
 
 fn find_attribute<'a>(attributes: &'a Vec<Attribute>, attribute_name: &str, parent_path: &str) -> Option<&'a Attribute> {
   attributes.iter()
@@ -13,6 +13,12 @@ fn find_attribute<'a>(attributes: &'a Vec<Attribute>, attribute_name: &str, pare
 
 fn create_ident(ident: String) -> Ident {
   Ident::new(ident.as_str(), Span::call_site())
+}
+
+fn create_lifetime_param(lifetime: String) -> GenericParam {
+  GenericParam::Lifetime(LifetimeParam::new(Lifetime::new(
+      format!("'{}", lifetime).as_str(),
+      Span::call_site())))
 }
 
 fn create_fn_arg(arg_name: Ident, arg_type: Type) -> FnArg {
@@ -51,7 +57,9 @@ pub fn new_macro(ast: &syn::DeriveInput) -> TokenStream {
   }
 
   let generic_lifetime_params = generic_lifetimes.iter()
-    .map(|x| format!("'{}", x.to_string())).collect::<Vec<String>>();
+    .map(|x| create_lifetime_param(x.to_string())).collect::<Vec<GenericParam>>();
+
+  //panic!("{:#?}", generic_lifetime_params);
 
   let mut typed_args = Vec::new();
 
