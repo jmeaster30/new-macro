@@ -1,5 +1,5 @@
 [package]
-name = "new-macro"
+name = "lilys-new-macro"
 description = "Macro for generating a 'new' constructor function"
 version = "0.1.0"
 edition = "2021"
