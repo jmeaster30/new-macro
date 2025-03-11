@@ -1,9 +1,13 @@
 [package]
 name = "new-macro"
-authors = [ "Lily Easterday" ]
-
+description = "Macro for generating a 'new' constructor function"
 version = "0.1.0"
 edition = "2021"
+authors = [ "Lily Easterday" ]
+repository = "https://github.com/jmeaster30/new-macro"
+license-file = "LICENSE"
+categories = [ "development-tools", "development-tools::build-utils" ]
+keywords = [ "derive", "macro", "struct", "new", "constructor" ]
 
 [lib]
 path = "src/lib.rs"

@@ -1,4 +1,3 @@
-
 use new_macro::New;
 
 #[derive(Debug, New)]
