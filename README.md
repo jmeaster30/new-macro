@@ -7,7 +7,7 @@ Here is a basic sample of the macro in action!
 ### Source Code:
 ```
 use new_macro::New;
-#[New]
+#[derive(New)]
 struct Test {
     a: i32,
     #[default(a * 2)]

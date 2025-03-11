@@ -20,7 +20,7 @@
 //! ```
 //! use new_macro::New;
 //!
-//! #[New]
+//! #[derive(New)]
 //! struct Test {
 //!     a: i32,
 //!     #[default(a * 2)]
@@ -66,7 +66,7 @@ use crate::new::new_macro;
 /// ```
 /// use new_macro::New;
 ///
-/// #[New]
+/// #[derive(New)]
 /// struct Test {
 ///     a: i32,
 ///     #[default(a * 2)]
