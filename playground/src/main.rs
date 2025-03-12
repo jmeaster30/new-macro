@@ -2,7 +2,7 @@ use new_macro::New;
 
 #[derive(Debug, New)]
 struct Test<'a> {
-    a: &'a i32,
+    value: &'a usize
 }
 
 fn main() {

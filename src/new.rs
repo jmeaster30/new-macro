@@ -1,7 +1,7 @@
 use std::str::FromStr;
-use proc_macro2::{Span, TokenStream, Ident};
+use proc_macro2::{Span, TokenStream, TokenTree, Ident, Punct, Spacing};
 use quote::{quote, quote_spanned};
-use syn::{Attribute, Data, Expr, Fields, FnArg, GenericParam, Lifetime, LifetimeParam, Lit, Meta, Pat, PatIdent, PatType, Type};
+use syn::{Attribute, Data, Expr, Fields, FnArg, GenericParam, Lit, Meta, Pat, PatIdent, PatType, Type};
 
 fn find_attribute<'a>(attributes: &'a Vec<Attribute>, attribute_name: &str, parent_path: &str) -> Option<&'a Attribute> {
   attributes.iter()
@@ -15,10 +15,8 @@ fn create_ident(ident: String) -> Ident {
   Ident::new(ident.as_str(), Span::call_site())
 }
 
-fn create_lifetime_param(lifetime: String) -> GenericParam {
-  GenericParam::Lifetime(LifetimeParam::new(Lifetime::new(
-      format!("'{}", lifetime).as_str(),
-      Span::call_site())))
+fn create_punct(punct: char) -> Punct {
+  Punct::new(punct, Spacing::Joint)
 }
 
 fn create_fn_arg(arg_name: Ident, arg_type: Type) -> FnArg {
@@ -45,21 +43,18 @@ pub fn new_macro(ast: &syn::DeriveInput) -> TokenStream {
     Data::Union(_) => panic!("'New' macro does not support unions :("),
   };
 
-  let mut generic_lifetimes = Vec::new();
-
-  for param in &ast.generics.params {
-    match param {
-      GenericParam::Lifetime(lifetime_param) =>
-        generic_lifetimes.push(lifetime_param.lifetime.ident.clone()),
-      GenericParam::Type(_) => todo!(),
-      GenericParam::Const(_) => todo!(),
-    }
-  }
-
-  let generic_lifetime_params = generic_lifetimes.iter()
-    .map(|x| create_lifetime_param(x.to_string())).collect::<Vec<GenericParam>>();
-
-  //panic!("{:#?}", generic_lifetime_params);
+  let generic_lifetimes_left = &ast.generics.params.iter().map(|x| x.clone()).collect::<Vec<GenericParam>>();
+  let generic_lifetimes_right = generic_lifetimes_left.iter()
+    .map(|param| match param {
+      GenericParam::Lifetime(lifetime_param) => vec![
+        TokenTree::Punct(create_punct('\'')),
+        TokenTree::Ident(lifetime_param.lifetime.ident.clone()),
+      ],
+      GenericParam::Type(type_param) => vec![ TokenTree::Ident(type_param.ident.clone()) ],
+      GenericParam::Const(const_param) => vec![ TokenTree::Ident(const_param.ident.clone()) ],
+    })
+    .map(|token_trees| token_trees.into_iter().collect::<TokenStream>())
+    .collect::<Vec<TokenStream>>();
 
   let mut typed_args = Vec::new();
 
@@ -118,7 +113,7 @@ pub fn new_macro(ast: &syn::DeriveInput) -> TokenStream {
     })
     .collect::<Vec<TokenStream>>();
 
-  if generic_lifetime_params.len() == 0 {
+  if generic_lifetimes_left.len() == 0 {
     quote! {
       impl #name {
         pub fn new( #(#params),* ) -> Self {
@@ -128,7 +123,7 @@ pub fn new_macro(ast: &syn::DeriveInput) -> TokenStream {
     }
   } else {
     quote! {
-      impl <#(#generic_lifetime_params),*> #name<#(#generic_lifetime_params),*> {
+      impl <#(#generic_lifetimes_left),*> #name<#(#generic_lifetimes_right),*> {
         pub fn new( #(#params),* ) -> Self {
           Self { #(#body),* }
         }
