@@ -30,6 +30,9 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Install expand
+        run: cargo install cargo-expand
+
       - name: Run cargo build
         run: cargo build --verbose
 
