@@ -1,3 +1,4 @@
+name: RUN RELEASE!!! OwO
 on:
   push:
     tags:
