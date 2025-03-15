@@ -1,0 +1,52 @@
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  create-github-release:
+    name: Create Github Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Build Package
+        run: cargo package
+
+      - name: Upload package as github release
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          artifactErrorsFailBuild: true
+          artifact: ./target/package/*.crate
+          makeLatest: true
+          skipIfReleaseExists: true
+
+  publish-my-crate:
+    name: Publish to Crates.io
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: publish crates
+        uses: katyo/publish-crates@v2
+        with:
+          registry-token: ${{ secrets.CRATES_IO_TOKEN }}
+          ignore-unpublished-changes: true
+
